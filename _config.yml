@@ -1,0 +1,4 @@
+# Keep repo tooling off the published site
+exclude:
+  - README.md
+  - serve.sh

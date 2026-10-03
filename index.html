@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Airshift — Coming Soon</title>
-  <meta name="description" content="Airshift is coming soon.">
-  <meta property="og:title" content="Airshift — Coming Soon">
+  <title>airshift.ai — Coming Soon</title>
+  <meta name="description" content="airshift.ai is coming soon.">
+  <meta property="og:title" content="airshift.ai — Coming Soon">
   <meta property="og:description" content="Something new is taking off.">
   <meta property="og:url" content="https://airshift.ai/">
   <meta name="theme-color" content="#0b1020">
@@ -59,7 +59,7 @@
     }
     .wordmark {
       font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
-      font-size: clamp(4rem, 15vw, 9.5rem);
+      font-size: clamp(3rem, 12vw, 8.5rem);
       font-weight: 700;
       line-height: 0.95;
       letter-spacing: -0.045em;
@@ -69,64 +69,82 @@
       color: transparent;
       padding-bottom: 0.08em;
     }
-    h2 {
-      font-family: "Space Grotesk", "Inter", system-ui, sans-serif;
-      font-size: clamp(1.25rem, 3.5vw, 1.9rem);
-      font-weight: 500;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--fg);
-    }
-    p.tagline {
-      max-width: 34rem;
-      font-size: clamp(1rem, 2.4vw, 1.2rem);
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border: 1px solid rgba(232, 236, 245, 0.14);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--fg);
-      background: rgba(255, 255, 255, 0.04);
-    }
-    .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 0 rgba(125, 211, 252, 0.6);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%   { box-shadow: 0 0 0 0 rgba(125, 211, 252, 0.6); }
-      70%  { box-shadow: 0 0 0 10px rgba(125, 211, 252, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(125, 211, 252, 0); }
-    }
-    footer {
-      position: relative;
-      text-align: center;
-      padding: 24px 16px;
-      font-size: 0.8rem;
-      color: var(--muted);
+    #dots {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
     @media (prefers-reduced-motion: reduce) {
-      .glow, .dot { animation: none; }
+      .glow { animation: none; }
     }
   </style>
 </head>
 <body>
   <div class="glow" aria-hidden="true"></div>
+  <canvas id="dots" aria-hidden="true"></canvas>
   <main>
-    <h1 class="wordmark">Airshift</h1>
-    <h2>Coming soon</h2>
-    <p class="tagline">Something new is taking off. We're putting the finishing touches on it — check back soon.</p>
-    <span class="badge"><span class="dot"></span> In the works</span>
+    <h1 class="wordmark">airshift.ai</h1>
   </main>
-  <footer>&copy; <span id="y">2026</span> Airshift</footer>
-  <script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+  <script>
+    (function () {
+      var canvas = document.getElementById("dots");
+      var ctx = canvas.getContext("2d");
+      var colors = ["125, 211, 252", "167, 139, 250", "232, 236, 245"];
+      var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var dots = [], w, h, dpr;
+
+      function rand(a, b) { return a + Math.random() * (b - a); }
+
+      function makeDot() {
+        var p = Math.random();
+        var r = p < 0.6 ? rand(0.8, 2) : p < 0.9 ? rand(2, 4) : rand(4, 9);
+        return {
+          x: rand(0, w), y: rand(0, h), r: r,
+          // bigger dots drift slower, like they're further back
+          vx: rand(-0.15, 0.15) / (r * 0.4 + 0.6),
+          vy: rand(-0.35, -0.05) / (r * 0.4 + 0.6),
+          a: rand(0.2, 0.75), phase: rand(0, Math.PI * 2),
+          c: colors[Math.floor(Math.random() * colors.length)]
+        };
+      }
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        w = window.innerWidth; h = window.innerHeight;
+        canvas.width = w * dpr; canvas.height = h * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        var count = Math.round(Math.min(140, (w * h) / 9000));
+        while (dots.length < count) dots.push(makeDot());
+        dots.length = count;
+      }
+
+      function draw(t) {
+        ctx.clearRect(0, 0, w, h);
+        for (var i = 0; i < dots.length; i++) {
+          var d = dots[i];
+          if (!reduce) {
+            d.x += d.vx; d.y += d.vy;
+            if (d.y < -10) { d.y = h + 10; d.x = rand(0, w); }
+            if (d.x < -10) d.x = w + 10;
+            if (d.x > w + 10) d.x = -10;
+          }
+          var twinkle = reduce ? 1 : 0.75 + 0.25 * Math.sin(t / 1200 + d.phase);
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(" + d.c + "," + (d.a * twinkle) + ")";
+          if (d.r > 3) { ctx.shadowBlur = d.r * 3; ctx.shadowColor = "rgba(" + d.c + ",0.5)"; }
+          else ctx.shadowBlur = 0;
+          ctx.fill();
+        }
+        if (!reduce) requestAnimationFrame(draw);
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+      requestAnimationFrame(draw);
+    })();
+  </script>
 </body>
 </html>
