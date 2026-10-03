@@ -3,10 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>airshift.ai — Coming Soon</title>
-  <meta name="description" content="airshift.ai is coming soon.">
-  <meta property="og:title" content="airshift.ai — Coming Soon">
-  <meta property="og:description" content="Something new is taking off.">
+  <title>airshift.ai</title>
+  <meta name="description" content="airshift.ai">
+  <link rel="canonical" href="https://airshift.ai/">
+  <meta property="og:title" content="airshift.ai">
+  <meta property="og:description" content="airshift.ai">
   <meta property="og:url" content="https://airshift.ai/">
   <meta name="theme-color" content="#0b1020">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1020'/%3E%3Cpath d='M14 44 L32 16 L50 44 M22 36 H42' stroke='%237dd3fc' stroke-width='6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -82,14 +83,93 @@
       left: 0;
       right: 0;
       bottom: 0;
-      text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 18px;
       padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
       font-size: 0.875rem;
       letter-spacing: 0.02em;
       color: var(--muted);
     }
+    .link {
+      font: inherit;
+      letter-spacing: inherit;
+      color: var(--muted);
+      background: none;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: rgba(143, 155, 179, 0.4);
+      text-underline-offset: 3px;
+      transition: color 0.2s, text-decoration-color 0.2s;
+    }
+    .link:hover, .link:focus-visible { color: var(--fg); text-decoration-color: var(--accent); }
+
+    dialog {
+      margin: auto;
+      width: min(420px, calc(100% - 32px));
+      padding: 28px;
+      border: 1px solid rgba(232, 236, 245, 0.12);
+      border-radius: 18px;
+      background: rgba(17, 23, 43, 0.92);
+      color: var(--fg);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+    }
+    dialog::backdrop { background: rgba(5, 8, 18, 0.6); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+    dialog[open] { animation: pop 0.2s ease-out; }
+    @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .dialog-head h2 { font-family: "Space Grotesk", "Inter", sans-serif; font-weight: 500; font-size: 1.35rem; letter-spacing: -0.01em; }
+    .close {
+      width: 32px; height: 32px;
+      border: 0; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+      font-size: 1.25rem; line-height: 1;
+      cursor: pointer;
+    }
+    .close:hover { color: var(--fg); background: rgba(255, 255, 255, 0.12); }
+    form { display: flex; flex-direction: column; gap: 12px; }
+    input, textarea {
+      width: 100%;
+      padding: 12px 14px;
+      font: inherit;
+      font-size: 1rem; /* 16px stops iOS zooming on focus */
+      color: var(--fg);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(232, 236, 245, 0.14);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    textarea { resize: vertical; min-height: 110px; }
+    input::placeholder, textarea::placeholder { color: rgba(143, 155, 179, 0.7); }
+    input:focus, textarea:focus { border-color: var(--accent); background: rgba(255, 255, 255, 0.06); }
+    .trap { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+    .send {
+      margin-top: 4px;
+      padding: 12px;
+      font: inherit;
+      font-weight: 500;
+      color: #0b1020;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .send:disabled { opacity: 0.6; cursor: wait; }
+    .status { min-height: 1.2em; font-size: 0.875rem; color: var(--muted); text-align: center; }
+    .status.error { color: #fca5a5; }
+    .thanks { text-align: center; padding: 12px 0 4px; color: var(--muted); line-height: 1.6; }
+    .thanks strong { display: block; margin-bottom: 4px; font-family: "Space Grotesk", sans-serif; font-size: 1.25rem; font-weight: 500; color: var(--fg); }
+
     @media (prefers-reduced-motion: reduce) {
-      .glow { animation: none; }
+      .glow, dialog[open] { animation: none; }
     }
   </style>
 </head>
@@ -99,9 +179,81 @@
   <main>
     <h1 class="wordmark">airshift.ai</h1>
   </main>
-  <footer>&copy; <span id="y">2026</span> airshift.ai. All rights reserved.</footer>
+  <footer>
+    <span>&copy; <span id="y">2026</span> airshift.ai. All rights reserved.</span>
+    <button type="button" class="link" id="contact-open">Contact</button>
+  </footer>
+
+  <dialog id="contact" aria-labelledby="contact-title">
+    <div class="dialog-head">
+      <h2 id="contact-title">Get in touch</h2>
+      <button type="button" class="close" id="contact-close" aria-label="Close">&times;</button>
+    </div>
+    <form id="contact-form" novalidate>
+      <input type="email" name="email" placeholder="Your email" aria-label="Your email" autocomplete="email" required maxlength="200">
+      <textarea name="message" placeholder="Message" aria-label="Message" required maxlength="2000"></textarea>
+      <!-- honeypot: humans never see this, bots fill it in -->
+      <input type="checkbox" name="botcheck" class="trap" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <button type="submit" class="send">Send</button>
+      <p class="status" id="contact-status" role="status"></p>
+    </form>
+  </dialog>
+
   <script>
     document.getElementById("y").textContent = new Date().getFullYear();
+
+    (function () {
+      // Web3Forms access key (public by design; it only lets this form send to the owner's inbox).
+      var ACCESS_KEY = "31960000-04ae-43b8-9d18-a1ff50a1d9e0";
+      var dialog = document.getElementById("contact");
+      var form = document.getElementById("contact-form");
+      var status = document.getElementById("contact-status");
+
+      document.getElementById("contact-open").addEventListener("click", function () { dialog.showModal(); });
+      document.getElementById("contact-close").addEventListener("click", function () { dialog.close(); });
+      // click on the backdrop closes it
+      dialog.addEventListener("click", function (e) { if (e.target === dialog) dialog.close(); });
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        status.className = "status";
+        if (!form.checkValidity()) {
+          status.textContent = "Please add your email and a message.";
+          status.className = "status error";
+          return;
+        }
+        var data = Object.fromEntries(new FormData(form));
+        if (data.botcheck) return;
+        var send = form.querySelector(".send");
+        send.disabled = true;
+        status.textContent = "Sending…";
+
+        var request = ACCESS_KEY
+          ? fetch("https://api.web3forms.com/submit", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Accept: "application/json" },
+              body: JSON.stringify({
+                access_key: ACCESS_KEY,
+                subject: "airshift.ai contact",
+                from_name: "airshift.ai",
+                email: data.email,
+                message: data.message,
+                botcheck: false
+              })
+            }).then(function (r) { return r.json(); })
+          // no key yet (local preview): pretend it worked
+          : new Promise(function (ok) { setTimeout(function () { ok({ success: true }); }, 600); });
+
+        request.then(function (res) {
+          if (!res.success) throw new Error(res.message);
+          form.outerHTML = '<p class="thanks"><strong>Thanks!</strong>Your message is on its way.</p>';
+        }).catch(function () {
+          send.disabled = false;
+          status.textContent = "Couldn't send. Please try again.";
+          status.className = "status error";
+        });
+      });
+    })();
     (function () {
       var canvas = document.getElementById("dots");
       var ctx = canvas.getContext("2d");
